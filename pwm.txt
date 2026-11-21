@@ -1,0 +1,88 @@
+// Pin definitions for Teensy 4.1 -> Cytron MDDS30
+const int AN1 = 2; // Left motor PWM (Speed)
+const int AN2 = 3; // Right motor PWM (Speed)
+const int IN1 = 4; // Left motor DIR (Direction)
+const int IN2 = 5; // Right motor DIR (Direction)
+
+// Speed setting (0 to 255). Kept at 150 (~60%) to protect your 2000mAh Li-ion pack from voltage sag.
+const int MOTOR_SPEED = 150; 
+
+void setup() {
+  pinMode(AN1, OUTPUT);
+  pinMode(AN2, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  // Ensure motors start stopped
+  stopMotors();
+  delay(2000); // 2-second safety pause after powering on
+
+  // 1. Move Forward for 3 seconds
+  moveForward(MOTOR_SPEED);
+  delay(3000);
+
+  // Brief pause before reversing to prevent high current spikes
+  stopMotors();
+  delay(300);
+
+  // 2. Move Backward for 3 seconds
+  moveBackward(MOTOR_SPEED);
+  delay(3000);
+
+  stopMotors();
+  delay(300);
+
+  // 3. Turn Left for 1 second (Left motor backward, Right motor forward)
+  turnLeft(MOTOR_SPEED);
+  delay(1000);
+
+  stopMotors();
+  delay(300);
+
+  // 4. Turn Right for 1 second (Left motor forward, Right motor backward)
+  turnRight(MOTOR_SPEED);
+  delay(1000);
+
+  // 5. Stop completely
+  stopMotors();
+}
+
+void loop() {
+  // Empty so the sequence runs only once. 
+  // Move the sequence from setup() into loop() if you want it to repeat forever.
+}
+
+// --- Helper Functions ---
+
+void moveForward(int speed) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  analogWrite(AN1, speed);
+  analogWrite(AN2, speed);
+}
+
+void moveBackward(int speed) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, HIGH);
+  analogWrite(AN1, speed);
+  analogWrite(AN2, speed);
+}
+
+void turnLeft(int speed) {
+  digitalWrite(IN1, HIGH); // Left motor reverse
+  digitalWrite(IN2, LOW);  // Right motor forward
+  analogWrite(AN1, speed);
+  analogWrite(AN2, speed);
+}
+
+void turnRight(int speed) {
+  digitalWrite(IN1, LOW);  // Left motor forward
+  digitalWrite(IN2, HIGH); // Right motor reverse
+  analogWrite(AN1, speed);
+  analogWrite(AN2, speed);
+}
+
+void stopMotors() {
+  analogWrite(AN1, 0);
+  analogWrite(AN2, 0);
+}
